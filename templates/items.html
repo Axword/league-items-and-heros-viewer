@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Items</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}"> <!-- Link to the CSS file -->
+</head>
+<body>
+    <h1>items</h1>
+    <div class="champion-grid">
+        {% for item_id, item in items.items() %}
+            <a href="/item/{{ item_id }}">
+                <img src="{{ url_for('serve_image', image_name=item_id ~ '.png') }}" alt="{{ item.name }}">
+                <p>{{ item['name'] }}</p>
+            </a>
+        {% endfor %}
+    </div>
+    <a href="/">Back to main</a>
+</body>
+</html>

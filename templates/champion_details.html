@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ champion['name'] }}</title>
+</head>
+<body>
+    <h1>{{ champion['name'] }}</h1>
+    <img src="/images/{{ fetch_image(champion['image']['full'], champion['id'] + '.png') }}" alt="{{ champion['name'] }}">
+    
+    <h2>Skills</h2>
+    <ul>
+        {% for spell in champion['spells'] %}
+        <li>{{ spell['name'] }}: {{ spell['description'] }}</li>
+        {% endfor %}
+    </ul>
+
+    <h2>Skins</h2>
+    <ul>
+        {% for skin in champion['skins'] %}
+        <li>{{ skin['name'] }}</li>
+        {% endfor %}
+    </ul>
+
+    <a href="/champions">Back to champions</a>
+</body>
+</html>

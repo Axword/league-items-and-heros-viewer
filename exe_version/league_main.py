@@ -19,6 +19,7 @@ class LeagueViewer:
         self.version_dir = os.path.join(self.cache_dir, self.latest_version)
         self.data_dir = os.path.join(self.version_dir, self.current_language)
         self.tags = set()
+        self.search_var = {}
         self.tag_vars = {}
         self.map_11_var = tk.BooleanVar(value=True)
         self.language_texts = {
@@ -53,7 +54,6 @@ class LeagueViewer:
             json.dump(data, file)
 
     def load_from_cache(self, data_type):
-        print(self.data_dir)
         path = os.path.join(self.data_dir, f"{data_type}.json")
         if os.path.exists(path):
             with open(path, "r") as file:
@@ -86,7 +86,7 @@ class LeagueViewer:
         root.title("League of Legends Viewer")
 
         # Language selection
-        self.language_label =ttk.Label(root,text=self.language_texts["choose_language"][self.current_language])
+        self.language_label = ttk.Label(root, text=self.language_texts["choose_language"][self.current_language])
         self.language_label.pack(pady=5)
         lang_frame = tk.Frame(root)
         lang_frame.pack()
@@ -101,21 +101,45 @@ class LeagueViewer:
         self.tab_control.add(self.items_tab, text=self.language_texts["items_tab"][self.current_language])
         self.tab_control.pack(expand=True, fill="both")
 
-        # Search and Listbox for champions
+        # Search Bar for Champions
         self.search_var = tk.StringVar()
         self.search_label = ttk.Label(self.champions_tab, text=self.language_texts["search"][self.current_language])
         self.search_label.pack(pady=5)
         search_entry = ttk.Entry(self.champions_tab, textvariable=self.search_var)
         search_entry.pack(pady=5)
-        search_entry.bind("<KeyRelease>", self.filter_champions)  # Keep this for search filtering
+        search_entry.bind("<KeyRelease>", self.filter_champions)  # For filtering champions
 
-        # Create a frame to hold the champion grid
-        self.champion_grid_frame = tk.Frame(self.champions_tab)
-        self.champion_grid_frame.pack(fill="both", expand=True, padx=10, pady=10)
+        # Champion grid with scrollable frame
+        champion_canvas = tk.Canvas(self.champions_tab)
+        champion_canvas.pack(side=tk.LEFT, fill="both", expand=True)
 
-        # Listbox for items
-        self.item_list_frame = tk.Frame(self.items_tab)
-        self.item_list_frame.pack(fill="both", expand=True, padx=10, pady=10)
+        self.champion_grid_frame = tk.Frame(champion_canvas)
+        champion_scrollbar = ttk.Scrollbar(self.champions_tab, orient="vertical", command=champion_canvas.yview)
+        champion_scrollbar.pack(side=tk.RIGHT, fill="y")
+
+        champion_canvas.configure(yscrollcommand=champion_scrollbar.set)
+        champion_canvas.create_window((0, 0), window=self.champion_grid_frame, anchor="nw")
+
+        self.champion_grid_frame.bind("<Configure>", lambda e: champion_canvas.configure(scrollregion=champion_canvas.bbox("all")))
+
+        # Listbox for items with scrollable frame
+        item_canvas = tk.Canvas(self.items_tab)
+        item_canvas.pack(side=tk.LEFT, fill="both", expand=True)
+
+        self.item_list_frame = tk.Frame(item_canvas)
+        item_scrollbar = ttk.Scrollbar(self.items_tab, orient="vertical", command=item_canvas.yview)
+        item_scrollbar.pack(side=tk.RIGHT, fill="y")
+
+        item_canvas.configure(yscrollcommand=item_scrollbar.set)
+        item_canvas.create_window((0, 0), window=self.item_list_frame, anchor="nw")
+
+        self.item_list_frame.bind("<Configure>", lambda e: item_canvas.configure(scrollregion=item_canvas.bbox("all")))
+
+        # Bind mouse wheel scrolling to canvas
+        item_canvas.bind_all("<MouseWheel>", self.on_mouse_wheel)
+        champion_canvas.bind_all("<MouseWheel>", self.on_mouse_wheel)
+
+        # Other GUI elements like tag checkboxes for items
         self.create_tag_checkboxes(self.item_list_frame)
 
     def update_champion_grid(self):
@@ -177,13 +201,9 @@ class LeagueViewer:
     def create_tag_checkboxes(self, tag_frame):
         """Create checkboxes for each tag in the item data."""
         for item_id, item_data in self.items.items():
-            print(item_id)
-            print(self.tags)
-            print(item_data)
             self.tags.update(item_data['tags'])
 
         self.tag_vars = {tag: tk.BooleanVar(value=True) for tag in self.tags}
-
         max_per_row = 10
         row_index = 0
 
@@ -217,7 +237,6 @@ class LeagueViewer:
     def show_champion_details(self, champion):
         details_window = tk.Toplevel()
         details_window.title(champion["name"])
-
         skills_frame = ttk.LabelFrame(details_window, text="Skills")
         skills_frame.pack(fill="both", expand=True, padx=10, pady=10)
         for spell in champion["spells"]:
@@ -247,6 +266,12 @@ class LeagueViewer:
         self.language_label.config(text=self.language_texts["choose_language"][self.current_language])
         self.tab_control.tab(0, text=self.language_texts["champions_tab"][self.current_language])
         self.tab_control.tab(1, text=self.language_texts["items_tab"][self.current_language])
+
+    def on_mouse_wheel(self, event):
+        """Handle mouse wheel scrolling."""
+        # Scroll the canvas based on the mouse wheel movement
+        self.champion.yview_scroll(int(-1 * (event.delta / 120)), "units")
+
 
 if __name__ == "__main__":
     root = tk.Tk()
