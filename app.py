@@ -92,7 +92,7 @@ class LeagueViewer:
 
 
     def run(self):
-        self.app.run(debug=True)
+        self.app.run(debug=True, host='0.0.0.0', port=10000)
 
 if __name__ == "__main__":
     viewer = LeagueViewer()
