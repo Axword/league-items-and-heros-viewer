@@ -1,13 +1,9 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Champions</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
-</head>
-<body>
-    <h1>Champions</h1>
+{% extends 'base.html' %}
+
+{% block title %}Champions{% endblock %}
+
+{% block content %}
+    <h1>{{ translations['champions'] }}</h1>
     <div class="champion-grid">
         {% for champion_id, champion in champions.items() %}
             <a href="/champion/{{ champion_id }}">
@@ -16,6 +12,4 @@
             </a>
         {% endfor %}
     </div>
-    <a href="/">Back to main</a>
-</body>
-</html>
+{% endblock %}

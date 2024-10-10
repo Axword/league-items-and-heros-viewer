@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+
+{% block title %}Items{% endblock %}
+
+{% block content %}
+<body>
+    <div class="item-container">
+        <!-- Item Header -->
+        <div class="item-header">
+            <h1>{{ item['name'] }}</h1>
+            <img src="/images/{{ fetch_image(item['image']['full'], item_id + '.png') }}" alt="{{ item['name'] }}">
+        </div>
+
+        <!-- Item Stats and Description -->
+        <div class="item-stats">
+            <h2>{{ translations['stats'] }}</h2>
+            <pre><strong>{{ translations['description'] }}:</strong> {{ item['description'] }}</pre>
+            <p><strong>{{ translations['cost'] }}:</strong> {{ item['gold']['total'] }} (Sell for {{ item['gold']['sell'] }})</p>
+
+            
+            {% if item['tags'] %}
+            <h3>{{ translations['tags'] }}:</h3>
+            <ul>
+                {% for tag in item['tags'] %}
+                <li>{{ tag }}</li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+        </div>
+
+        <!-- Related Items (Build Path) -->
+        {% if item['into'] %}
+        <div class="related-items">
+            <h2>{{ translations['builds_into'] }}:</h2>
+            <ul>
+                {% for related_item in item['into'] %}
+                <li><a href="/item/{{ related_item }}">{{ item_data.get(related_item)['name'] }}</a></li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+
+        <a href="/items">{{ translations['back_to_items'] }}</a>
+    </div>
+</body>
+</html>
+{% endblock %}
