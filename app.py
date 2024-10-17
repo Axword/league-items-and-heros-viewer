@@ -66,6 +66,7 @@ class LeagueViewer:
                 'spellkeybind': "Przycisk umiejętności",
             }
         }
+        self.spell_keybind_map = {0: 'Q', 1: 'W', 2: 'E', 3: 'R'}
 
     def setup_routes(self):
         @self.app.route('/')
@@ -163,7 +164,7 @@ class LeagueViewer:
             correct_champion_id = random.choice(list(champions_data.keys()))
             correct_champion = champions_data[correct_champion_id]
             correct_spell = random.choice(correct_champion['spells'])
-            spell_keyboardbind = correct_spell['id'][-1]
+            spell_keyboardbind = self.spell_keybind_map.get(correct_champion['spells'].index(correct_spell))
             correct_spell_name = correct_spell['name']
             ability_image_url = f"https://ddragon.leagueoflegends.com/cdn/{self.latest_version}/img/spell/{correct_spell['id']}.png"
             champion_image_url = f"https://ddragon.leagueoflegends.com/cdn/{self.latest_version}/img/champion/{correct_champion_id}.png"
@@ -188,7 +189,7 @@ class LeagueViewer:
                 correct_answer=correct_spell_name,
                 total_champions=total_champions,
                 language=self.language,
-                spell_keybind=spell_keyboardbind,
+                spell_keybind=spell_keyboardbind.upper(),
                 translations=self.translations[self.language]
             )
 
@@ -200,7 +201,7 @@ class LeagueViewer:
             correct_champion = champions_data[correct_champion_id]
             correct_spell = random.choice(correct_champion['spells'])
             correct_spell_name = correct_spell['name']
-            spell_keyboardbind = correct_spell['id'][-1]
+            spell_keyboardbind = self.spell_keybind_map.get(correct_champion['spells'].index(correct_spell))
             ability_image_url = f"https://ddragon.leagueoflegends.com/cdn/{self.latest_version}/img/spell/{correct_spell['id']}.png"
             champion_image_url = f"https://ddragon.leagueoflegends.com/cdn/{self.latest_version}/img/champion/{correct_champion_id}.png"
             self.fetch_image(champion_image_url, f"{correct_champion_id}.png")
@@ -215,7 +216,7 @@ class LeagueViewer:
             return jsonify({
                 "champion_image": f"{correct_champion_id}.png",
                 "ability_image": f"{correct_spell['id']}.png",
-                "spell_keybind": spell_keyboardbind,
+                "spell_keybind": spell_keyboardbind.upper(),
                 "options": options,
                 "correct_answer": correct_spell_name,
                 "total_champions": total_champions

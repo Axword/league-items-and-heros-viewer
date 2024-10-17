@@ -9,7 +9,7 @@
             <p>{{ translations['correct'] }}: <span id="correct-counter">0</span></p>
             <p>{{ translations['wrong'] }}: <span id="wrong-counter">0</span></p>
             <p>{{ translations['completed'] }}: <span id="completed-counter">0</span>/{{ total_champions }}</p>
-            <p>{{ translations['spellkeybind'] }}: {{spell_keybind}}</span>{{ total_items }}</p>        
+            <p>{{ translations['spellkeybind'] }}: <span id="spell-keybind">{{ spell_keybind }}</span></p>        
         </div>
     </div>
 
@@ -75,7 +75,7 @@
             } else {
                 showFinalScreen();
             }
-        }, 2000);
+        }, 1200);
     }
     
     function loadNextQuestion() {
@@ -87,10 +87,12 @@
                 return response.json();
             })
             .then(data => {
-                document.querySelector('.quiz-champion-image').src = `/images/${data.champion_image}`; // Corrected image name
-                document.querySelector('.quiz-ability-image').src = `/images/${data.ability_image}`; // Added ability image
+                document.querySelector('.quiz-champion-image').src = `/images/${data.champion_image}`; 
+                document.querySelector('.quiz-ability-image').src = `/images/${data.ability_image}`; 
+                
                 const optionsContainer = document.querySelector('.answer-options');
                 optionsContainer.innerHTML = '';
+                
                 data.options.forEach(option => {
                     const button = document.createElement('button');
                     button.classList.add('answer-option');
@@ -99,7 +101,9 @@
                     button.addEventListener('click', () => checkAnswer(option, data.correct_answer));
                     optionsContainer.appendChild(button);
                 });
+                
                 document.getElementById('result-message').innerText = '';
+                document.getElementById('spell-keybind').innerText = data.spell_keybind; // Update spell keybind
             })
             .catch(error => {
                 console.error('There was a problem with the fetch operation:', error);
