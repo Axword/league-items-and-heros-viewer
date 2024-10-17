@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="quiz-container">
+    <div class="quiz-header">
+        <h1>{{ translations['champions'] }} Quiz</h1>
+        <div class="scoreboard">
+            <p>{{ translations['correct'] }}: <span id="correct-counter">0</span></p>
+            <p>{{ translations['wrong'] }}: <span id="wrong-counter">0</span></p>
+            <p>{{ translations['completed'] }}: <span id="completed-counter">0</span>/{{ total_champions }}</p>
+            <p>{{ translations['spellkeybind'] }}: {{spell_keybind}}</span>{{ total_items }}</p>        
+        </div>
+    </div>
+
+    <div class="quiz-content">
+        <img src="{{ url_for('serve_image', image_name=champion_image) }}" alt="Champion Image" class="quiz-champion-image">
+        <img src="{{ url_for('serve_image', image_name=ability_image) }}" alt="Ability Image" class="quiz-ability-image">
+        <div class="answer-options">
+            {% for option in options %}
+            <button class="answer-option" data-answer="{{ option }}">
+                {{ option }}
+            </button>        
+            {% endfor %}
+        </div>
+    </div>
+    <div id="result-message"></div>
+</div>
+
+<script>
+    let correctAnswers = 0;
+    let wrongAnswers = 0;
+    let completedChampions = 0;
+    const totalChampions = {{ total_champions }};
+    
+    document.addEventListener('DOMContentLoaded', () => {
+        const buttons = document.querySelectorAll('.answer-option');
+        const correctAnswer = "{{ correct_answer }}";
+
+        buttons.forEach(button => {
+            button.addEventListener('click', () => {
+                checkAnswer(button.dataset.answer, correctAnswer);
+            });
+        });
+    });
+
+    function checkAnswer(selectedAnswer, correctAnswer) {
+        const options = document.querySelectorAll('.answer-option');
+        
+        options.forEach(option => {
+            option.classList.add('disabled');
+            if (option.dataset.answer === correctAnswer) {
+                option.classList.add('correct');
+            } else {
+                option.classList.add('wrong');
+            }
+        });
+        
+        if (selectedAnswer === correctAnswer) {
+            correctAnswers++;
+            document.getElementById('correct-counter').innerText = correctAnswers;
+            document.getElementById('result-message').innerText = "{{ translations['correct'] }}!";
+        } else {
+            wrongAnswers++;
+            document.getElementById('wrong-counter').innerText = wrongAnswers;
+            document.getElementById('result-message').innerText = "{{ translations['wrong'] }}!";
+        }
+
+        completedChampions++;
+        document.getElementById('completed-counter').innerText = completedChampions;
+
+        setTimeout(() => {
+            if (completedChampions < totalChampions) {
+                loadNextQuestion();
+            } else {
+                showFinalScreen();
+            }
+        }, 2000);
+    }
+    
+    function loadNextQuestion() {
+        fetch('/quiz/champions/next')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                document.querySelector('.quiz-champion-image').src = `/images/${data.champion_image}`; // Corrected image name
+                document.querySelector('.quiz-ability-image').src = `/images/${data.ability_image}`; // Added ability image
+                const optionsContainer = document.querySelector('.answer-options');
+                optionsContainer.innerHTML = '';
+                data.options.forEach(option => {
+                    const button = document.createElement('button');
+                    button.classList.add('answer-option');
+                    button.dataset.answer = option;
+                    button.innerText = option;
+                    button.addEventListener('click', () => checkAnswer(option, data.correct_answer));
+                    optionsContainer.appendChild(button);
+                });
+                document.getElementById('result-message').innerText = '';
+            })
+            .catch(error => {
+                console.error('There was a problem with the fetch operation:', error);
+                document.getElementById('result-message').innerText = "Error loading the next question.";
+            });
+    }
+
+    function showFinalScreen() {
+        document.querySelector('.quiz-content').innerHTML = `
+            <h2>{{ translations['quiz_complete'] }}</h2>
+            <p>{{ translations['correct'] }}: ${correctAnswers}</p>
+            <p>{{ translations['wrong'] }}: ${wrongAnswers}</p>
+            <p>{{ translations['thanks'] }}</p>
+        `;
+    }
+</script>
+{% endblock %}

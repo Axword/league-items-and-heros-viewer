@@ -1,36 +1,41 @@
 <!DOCTYPE html>
 <html lang="{{ language }}">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}{{ translations['welcome'] }}{% endblock %}</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
-</head>
-<body>
-    <div class="topbar">
-        <div class="nav-links">
-            <a href="/champions">{{ translations['champions'] }}</a>
-            <a href="/items">{{ translations['items'] }}</a>
+<div class="containers">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>{% block title %}{{ translations['welcome'] }}{% endblock %}</title>
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    </head>
+    <body>
+        <div class="topbar">
+            <div class="nav-links">
+                <a href="/champions">{{ translations['champions'] }}</a>
+                <a href="/items">{{ translations['items'] }}</a>
+                <a href="/quiz/items">{{ "Quiz " + translations['items'] }}</a>
+                <a href="/quiz/champions">{{ "Quiz " + translations['champions'] }}</a>
+
+            </div>
+
+            <div class="language-selector">
+                <form method="POST" action="/set_language">
+                    <label for="language">{{ translations['language'] }}</label>
+                    <select name="language" id="language" onchange="this.form.submit()">
+                        <option value="en_US" {% if language == 'en_US' %}selected{% endif %}>{{ translations['english'] }}</option>
+                        <option value="pl_PL" {% if language == 'pl_PL' %}selected{% endif %}>{{ translations['polish'] }}</option>
+                    </select>
+                </form>
+            </div>
         </div>
 
-        <div class="language-selector">
-            <form method="POST" action="/set_language">
-                <label for="language">{{translations['language']}}</label>
-                <select name="language" id="language" onchange="this.form.submit()">
-                    <option value="en_US" {% if language == 'en_US' %}selected{% endif %}>{{translations['english']}}</option>
-                    <option value="pl_PL" {% if language == 'pl_PL' %}selected{% endif %}>{{translations['polish']}}</option>
-                </select>
-            </form>
+        <div class="content">
+            {% block content %}{% endblock %}
         </div>
-    </div>
-
-    <div class="content">
-        {% block content %}{% endblock %}
-    </div>
 
     <footer class="footer">
         <p>Strona zrobiona przez Michała Cybulskiego</p>
         <a href="https://github.com/Axword">Github<a>
     </footer>
+</div>
 </body>
 </html>
